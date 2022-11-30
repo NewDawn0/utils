@@ -1,0 +1,11 @@
+CC = gcc
+CFLAGS = -Wall -g --outdir bin
+cc:
+    @echo "Compiling serde-ffmpeg"
+    mkdir bin
+    ${CC} ${CFLAGS} *.c
+
+mv:
+    @echo "Moving serde-ffmpeg"
+    mkdir ../../bin
+    mv bin/* ../../bin
