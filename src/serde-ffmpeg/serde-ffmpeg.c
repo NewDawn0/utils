@@ -7,14 +7,21 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
+#include <stdbool.h>
+
+// Definitions
+#define empty 100
 
 // Static Messages
 char HELP[] = "serde-ffmpeg - A threaded wrapper around ffmpeg\nUSAGE: serde-ffmpeg <your normal ffmpeg operatons>";
-char *cliArgs[2] = {"-i", "-a"};
+char *cliArgs[1] = {"-i"};
+
 
 // Function declarations
 void splitVideos(char *inFile);
 int in(char **arr, int len, char *target);
+bool fileExists(char *fname);
 
 // Main
 int main(int argc, char *argv[]) {
@@ -24,21 +31,22 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     for (int ac = 0; ac < argc; ac++) {
-        int inRes = in(cliArgs, 2, argv[ac]);
+        int inRes = in(cliArgs, 1, argv[ac]);
         if (inRes >= 0) {
-            printf("Argument %s found at index %d\n", argv[ac], ac);
             if (argv[ac+1] != NULL) {
-                printf("Next Argument %s found at index %d\n", argv[ac+1], ac+1);
+                printf("fileindex[?] = %d\n", ac+1);
             } else {
-                char *errmsg;
-                asprintf(&errmsg, "ERROR :: No input provided after option %s", cliArgs[inRes]);
-                perror(errmsg);
-                free(errmsg);
+                fprintf(stderr, "ERROR: No input provided after option %s\n", cliArgs[inRes]);
                 return 1;
             }
         }
     }
     char inFile[] = "Hello world";
+    // Check if file exists
+    if (!fileExists(inFile)) {
+        perror("ERROR");
+        return 1;
+    }
     splitVideos(inFile);
     return 0;
 }
@@ -60,6 +68,14 @@ int in(char **arr, int len, char *target) {
         }
     }
     return -1;
+}
+
+// Check if file exists
+bool fileExists(char *fname) {
+    if (access(fname, F_OK) == 0) {
+        return true;
+    }
+    return false;
 }
 // Command
 // fmpeg -i "input" -ss 164 -f segment -segment_time 120 -reset_timestamps 1 -map 0:0 -an output_video%d.MTS
