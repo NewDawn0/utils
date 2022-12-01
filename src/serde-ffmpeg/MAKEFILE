@@ -1,11 +1,22 @@
 CC = gcc
-CFLAGS = -Wall -g --outdir bin
-cc:
-    @echo "Compiling serde-ffmpeg"
-    mkdir bin
-    ${CC} ${CFLAGS} *.c
+OUTFILE = serde-ffmpeg
+OUTDIR = bin
+CFLAGS = -Wall -g
+OBJS = serde-ffmpeg.c
 
-mv:
-    @echo "Moving serde-ffmpeg"
-    mkdir ../../bin
-    mv bin/* ../../bin
+all: compile
+.PHONY: move clean
+
+compile: $(OBJS)
+	@echo "Compiling serde-ffmpeg..."
+	mkdir -p $(OUTDIR)
+	$(CC) $(CFLAGS) -o $(OUTDIR)/$(OUTFILE) $(OBJS)
+
+move:
+	@echo "Moving serde-ffmpeg..."
+	mkdir -p ../../bin
+	mv $(OUTDIR)/* ../../bin
+
+clean:
+	@echo "Cleaning serde-ffmpeg..."
+	rm -rf $(OUTDIR)/*.dSYM $(OUTDIR)/*.o
