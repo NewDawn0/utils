@@ -4,7 +4,7 @@
 // source "https://markkevinbaltazar.medium.com/lets-make-a-dynamic-array-vector-in-c-16dbe6d72a79"
 
 // Push
-void vectorPush(Vector* self, void* data) {
+void VectorPush(Vector* self, void* data) {
     // resize if full
     if (self->count == self->limit) {
         self->limit = self->limit+1;
@@ -15,7 +15,7 @@ void vectorPush(Vector* self, void* data) {
     self->count ++;
 }
 // remove
-void vectorRemove(Vector* self, int index) {
+void VectorRemove(Vector* self, int index) {
     if (index > -1 && index < self->count) {
         // swap the last item to the index to be removed
         // then remove the last item
@@ -25,18 +25,18 @@ void vectorRemove(Vector* self, int index) {
     }
 }
 // delete
-void vectorFree(Vector* self) {
+void VectorFree(Vector* self) {
     if (self->data) {
         free(self->data);
         self->data = NULL;
     }
 }
 // init
-void vectorInit(Vector* vector) {
+void VectorInit(Vector* vector) {
     vector->limit = VECTOR_INIT_LIM;
     vector->count = 0;
-    vector->push = vectorPush;
-    vector->remove = vectorRemove;
-    vector->free = vectorFree;
+    vector->push = VectorPush;
+    vector->remove = VectorRemove;
+    vector->free = VectorFree;
     vector->data = malloc(sizeof(void*) * vector->limit);
 }
