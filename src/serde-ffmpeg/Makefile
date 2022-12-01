@@ -2,7 +2,7 @@ CC = gcc
 OUTFILE = serde-ffmpeg
 OUTDIR = bin
 CFLAGS = -Wall -g
-OBJS = serde-ffmpeg.c
+OBJS = serde-ffmpeg.c ../../common/vector.c
 
 all: compile
 .PHONY: move clean
