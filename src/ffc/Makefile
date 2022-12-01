@@ -1,22 +1,22 @@
 CC = gcc
-OUTFILE = serde-ffmpeg
+OUTFILE = ffc
 OUTDIR = bin
 CFLAGS = -Wall -g
-OBJS = serde-ffmpeg.c ../../common/vector.c
+OBJS = ffc.c
 
 all: compile
 .PHONY: move clean
 
 compile: $(OBJS)
-	@echo "Compiling serde-ffmpeg..."
+	@echo "Compiling ffc..."
 	mkdir -p $(OUTDIR)
 	$(CC) $(CFLAGS) -o $(OUTDIR)/$(OUTFILE) $(OBJS)
 
 move:
-	@echo "Moving serde-ffmpeg..."
+	@echo "Moving ffc..."
 	mkdir -p ../../bin
 	mv $(OUTDIR)/* ../../bin
 
 clean:
-	@echo "Cleaning serde-ffmpeg..."
+	@echo "Cleaning ffc..."
 	rm -rf $(OUTDIR)/*.dSYM $(OUTDIR)/*.o
