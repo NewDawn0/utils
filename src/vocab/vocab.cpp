@@ -112,7 +112,6 @@ void whoAsked(tuple<vector<string>, map<string, string>> in) {
     srand(time(0));
     ::oldRand = rand() % askVec.size();
     string userInput;
-    int rand;
     // ask
     while (askVec.size() > 0) {
         if (askVec.size() > 1) {
