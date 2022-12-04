@@ -1,4 +1,4 @@
 =====================================
 Compile using
-ä g++ -Wall -g -o bin/vocab vocab.cpp
+$ g++ -Wall -g -o bin/vocab vocab.cpp
 =====================================
