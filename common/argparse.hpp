@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////
 // argparse - A simple cpp argument parser       //
-// Writeen/Copyright by NewDawn0 (Tom) 7.12.2022 //
+// Written/Copyright by NewDawn0 (Tom) 7.12.2022 //
 // Code is licensed under the MIT license        //
 ///////////////////////////////////////////////////
 #pragma once
@@ -27,12 +27,14 @@ using std::vector;
 namespace parsing {
     class ArgParser {
         vector<string> argKeys, multi, multiDone, noNextReq, otherArgs;
-        vector<pair<string, string>> temporaryContainer;
-        map<string, vector<string>> container;
+        vector<pair<string, string>> container;
+        map<string, vector<string>> argtainer;
         private:
             int contains(vector<string> targetVec, string item);
+            void order();
         public:
             void addArg(string arg, bool reqNextArg = true, bool multipleAllowed = false);
             void parse(int argc, char *argv[], bool allowInvalidArguments = false);
+            void pprint();
     };
 }

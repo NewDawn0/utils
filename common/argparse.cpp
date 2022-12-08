@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////
 // argparse - A simple cpp argument parser       //
-// Writeen/Copyright by NewDawn0 (Tom) 7.12.2022 //
+// Written/Copyright by NewDawn0 (Tom) 7.12.2022 //
 // Code is licensed under the MIT license        //
 ///////////////////////////////////////////////////
 
@@ -41,7 +41,8 @@ void parsing::ArgParser::addArg(string arg, bool reqNextArg, bool multipleAllowe
 
 // parser parse
 void parsing::ArgParser::parse(int argc, char *argv[], bool allowInvalidArguments) {
-    if (argc == 1) {
+    if (argc == 1 && parsing::ArgParser::argKeys.size() == 0) {
+        // err out if no argument is listed
         std::cerr << red << "ArgParse Error "<< reset << ArgParserNoFileErr << std::endl;
         exit(1);
     } else {
@@ -50,27 +51,48 @@ void parsing::ArgParser::parse(int argc, char *argv[], bool allowInvalidArgument
             if (contains(parsing::ArgParser::argKeys, argv[argIndex]) != -1) {
                 if (contains(parsing::ArgParser::multi, argv[argIndex]) != -1 || contains(parsing::ArgParser::multiDone, argv[argIndex]) == -1) {
                     parsing::ArgParser::multiDone.push_back(argv[argIndex]);
-                    std::cout << "Argument: " << argv[argIndex] << " is OK" << std::endl;
-                    if (argc-1 >= argIndex+1) {
-                        argIndex++;
+                    // create temporary container
+                    pair<string, string> pContainer;
+                    // check if argument needs next arg
+                    if (contains(parsing::ArgParser::noNextReq, argv[argIndex]) != -1) {
+                        // add arg to container
+                        pContainer = std::make_pair(argv[argIndex], NULL);
+                        parsing::ArgParser::container.push_back(pContainer);
                     } else {
-                        std::cerr << red << "ArgParse Error " << reset << ArgParserNoArgErr << std::endl;
-                        exit(1);
-
+                        // look if there is next arg
+                        if (argc-1 >= argIndex+1) {
+                            // add arg to container
+                            pContainer = std::make_pair(argv[argIndex], argv[argIndex+1]);
+                            parsing::ArgParser::container.push_back(pContainer);
+                            argIndex++;
+                        } else {
+                            // err if no next arg is found
+                            std::cerr << red << "ArgParse Error " << reset << ArgParserNoArgErr << std::endl;
+                            exit(1);
+                        }
                     }
                 } else {
+                    // err if there are multiple of the same arg which is not allowed as default
                     std::cerr << red << "ArgParse Error " << reset << ArgParserMultiargErr << red << " \'" << reset << argv[argIndex] << red << "\'" << reset << std::endl; 
                     exit(1);
                 }
             } else {
+                // err if invalid arguments aren't allowed
                 if (!allowInvalidArguments) {
                     std::cerr << red << "ArgParse Error " << reset << ArgParserInvalidArgErr <<red << " \'" << reset << argv[argIndex] << red << "\'" << reset << std::endl;
                     exit(1);
                 }
+                // collect "invalid" argument as otherArgs
                 otherArgs.push_back(argv[argIndex]);
             }
-            std::cout << "arg: " << argv[argIndex] << std::endl;
             argIndex++;
         }
+    }
+}
+
+// parser reorder and make available
+void parsing::ArgParser::pprint() {
+    for (auto &item: parsing::ArgParser::container) {
+        std::cout << "first:"<<std::get<0>(item)<<" second:"<<std::get<1>(item) << std::endl;
     }
 }
