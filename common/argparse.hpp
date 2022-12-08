@@ -24,23 +24,28 @@ using std::vector;
 #define ArgParserMultiArgErr "This Argument can only be provided once"
 
 // argument parser
-namespace parsing {
+namespace libargparse {
     class ArgParser {
-        vector<string> argKeys, multi, multiDone, noNextReq, otherArgs;
-        vector<string> eventTriggers = {"NoArguments", "AllowNoArguments", "MissingArg", "MultiArg", "InvalidArg"};
-        map<string, void (*)()> events = {{"NoArguments", NULL},
-            {"AllowNoArguments", NULL}, {"MissingArg", NULL}, 
-            {"MultiArg", NULL}, {"InvalidArg", NULL}
-        };
-        vector<int> fnPtrs;
-        vector<pair<string, string>> container;
-        map<string, vector<string>> argtainer;
         private:
+            // vars
+            vector<string> argKeys, multi, multiDone, noNextReq;
+            vector<string> eventTriggers = {"NoArguments", "AllowNoArguments", "MissingArg", "MultiArg", "InvalidArg"};
+            map<string, void (*)()> events = {{"NoArguments", NULL},
+                {"AllowNoArguments", NULL}, {"MissingArg", NULL}, 
+                {"MultiArg", NULL}, {"InvalidArg", NULL}
+            };
+            // fn
+            vector<pair<string, string>> container;
             int contains(vector<string> targetVec, string item);
             void order();
         public:
+            // vars
+            vector<string> otherArgs;
+            map<string, vector<string>> argtainer;
+            // fn
             void addArg(string arg, bool reqNextArg = true, bool multipleAllowed = false);
             void parse(int argc, char *argv[], bool allowInvalidArguments = false, bool allowNoArguments = false);
             void addTrigger(string event, void (*fnPtr)());
+            void help();
     };
 }

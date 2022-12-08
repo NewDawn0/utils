@@ -5,7 +5,6 @@
 ///////////////////////////////////////////////////
 
 // libs
-#include <cstddef>
 #include <map>
 #include <vector>
 #include <string>
@@ -18,13 +17,12 @@
 #define reset "\033[0m"
 
 // use
-using std::map;
 using std::pair;
 using std::vector;
 using std::string;
 
 // parser contains
-int parsing::ArgParser::contains(vector<string> targetVec, string item) {
+int libargparse::ArgParser::contains(vector<string> targetVec, string item) {
     auto res = std::find(targetVec.begin(), targetVec.end(), item);
     if (res != targetVec.end()) {
         return res - targetVec.begin();
@@ -32,19 +30,48 @@ int parsing::ArgParser::contains(vector<string> targetVec, string item) {
         return -1; 
     }
 }
+// parser order arguments in argtainer
+void libargparse::ArgParser::order() {
+    // create map element for every argument
+    for (string &item : argKeys) {
+        vector<string> elems;
+        argtainer[item] = elems;
+    }
+    // add items to argument map
+    for (pair<string, string> &item : container) {
+        argtainer[std::get<0>(item)].push_back(std::get<1>(item));
+    }
+    // seach for unused args and dupliate options
+    vector<string> del, change;
+    for (const auto &item : argtainer) {
+        if (item.second.empty()) {
+            del.push_back(item.first);
+        } else if (item.second[0].empty()) {
+            change.push_back(item.first);
+        }
+    }
+    // remove unused options
+    for (string &item : del) {
+        argtainer.erase(item);
+    }
+    // remove duplicates of single arg options
+    for (string &item : change) {
+        argtainer[item].resize(1);
+    }
+}
 
 // parser addArg
-void parsing::ArgParser::addArg(string arg, bool reqNextArg, bool multipleAllowed) {
-    if (multipleAllowed) parsing::ArgParser::multi.push_back(arg);
-    if (!reqNextArg) parsing::ArgParser::noNextReq.push_back(arg);
-    parsing::ArgParser::argKeys.push_back(arg);
+void libargparse::ArgParser::addArg(string arg, bool reqNextArg, bool multipleAllowed) {
+    if (multipleAllowed) libargparse::ArgParser::multi.push_back(arg);
+    if (!reqNextArg) libargparse::ArgParser::noNextReq.push_back(arg);
+    libargparse::ArgParser::argKeys.push_back(arg);
 }
 
 // parser parse
-void parsing::ArgParser::parse(int argc, char *argv[], bool allowInvalidArguments, bool allowNoArguments) {
+void libargparse::ArgParser::parse(int argc, char *argv[], bool allowInvalidArguments, bool allowNoArguments) {
     if (argc == 1 && !allowNoArguments) {
         // Override default
-        if (parsing::ArgParser::events["NoArguments"] != NULL) {
+        if (libargparse::ArgParser::events["NoArguments"] != NULL) {
             events["NoArguments"]();
         } else {
             // err out if no argument is listed and allow no arguments is listed as false
@@ -53,21 +80,21 @@ void parsing::ArgParser::parse(int argc, char *argv[], bool allowInvalidArgument
         }
     } else if (argc == 1) {
         // Override default
-        if (parsing::ArgParser::events["AllowNoArguments"] != NULL) {
+        if (libargparse::ArgParser::events["AllowNoArguments"] != NULL) {
             events["AllowNoArguments"]();
         }
     } else {
         int argIndex = 1;
         while (argIndex < argc) {
-            if (contains(parsing::ArgParser::argKeys, argv[argIndex]) != -1) {
-                if (contains(parsing::ArgParser::multi, argv[argIndex]) != -1 || contains(parsing::ArgParser::multiDone, argv[argIndex]) == -1) {
+            if (contains(libargparse::ArgParser::argKeys, argv[argIndex]) != -1) {
+                if (contains(libargparse::ArgParser::multi, argv[argIndex]) != -1 || contains(libargparse::ArgParser::multiDone, argv[argIndex]) == -1) {
                     multiDone.push_back(argv[argIndex]);
                     // create temporary container
                     pair<string, string> pContainer;
                     // check if argument needs next arg
-                    if (contains(parsing::ArgParser::noNextReq, argv[argIndex]) != -1) {
+                    if (contains(libargparse::ArgParser::noNextReq, argv[argIndex]) != -1) {
                         // add arg to container
-                        pContainer = std::make_pair(argv[argIndex], NULL);
+                        pContainer = std::make_pair(argv[argIndex], "");
                         container.push_back(pContainer);
                     } else {
                         // look if there is next arg
@@ -78,7 +105,7 @@ void parsing::ArgParser::parse(int argc, char *argv[], bool allowInvalidArgument
                             argIndex++;
                         } else {
                             // Override default
-                            if (parsing::ArgParser::events["MissingArg"] != NULL) {
+                            if (libargparse::ArgParser::events["MissingArg"] != NULL) {
                                 events["MissingArg"]();
                             } else {
                                 // err if no next arg is found
@@ -89,7 +116,7 @@ void parsing::ArgParser::parse(int argc, char *argv[], bool allowInvalidArgument
                     }
                 } else {
                     // Override default
-                    if (parsing::ArgParser::events["MultiArg"] != NULL) {
+                    if (libargparse::ArgParser::events["MultiArg"] != NULL) {
                         events["MultiArg"]();
                     } else {
                         // err if there are multiple of the same arg which is not allowed as default
@@ -101,7 +128,7 @@ void parsing::ArgParser::parse(int argc, char *argv[], bool allowInvalidArgument
                 // err if invalid arguments aren't allowed
                 if (!allowInvalidArguments) {
                     // Override default
-                    if (parsing::ArgParser::events["InvalidArg"] != NULL) {
+                    if (libargparse::ArgParser::events["InvalidArg"] != NULL) {
                         events["InvalidArg"]();
                     } else {
                         std::cerr << red << "ArgParse Error " << reset << ArgParserInvalidArgErr <<red << " \'" << reset << argv[argIndex] << red << "\'" << reset << std::endl;
@@ -114,12 +141,13 @@ void parsing::ArgParser::parse(int argc, char *argv[], bool allowInvalidArgument
             argIndex++;
         }
     }
+    libargparse::ArgParser::order();
 }
 
 // addTrigger - Override default behaviour
-void parsing::ArgParser::addTrigger(string event, void (*fnPtr)()) {
+void libargparse::ArgParser::addTrigger(string event, void (*fnPtr)()) {
     // if event exist overwrite original behaviour
-    if (contains(parsing::ArgParser::eventTriggers, event) != -1) {
+    if (contains(libargparse::ArgParser::eventTriggers, event) != -1) {
         events[event] = fnPtr;
     }
 }
