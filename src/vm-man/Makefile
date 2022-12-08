@@ -2,7 +2,7 @@ CC = gcc
 OUTFILE = vm-man
 OUTDIR = bin
 CFLAGS = -Wall -g
-OBJS = vm-man.c
+OBJS = vm-man.c ../../common/vector.c
 
 all: compile
 .PHONY: move clean
