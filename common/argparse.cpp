@@ -8,6 +8,7 @@
 #include <map>
 #include <vector>
 #include <string>
+#include <utility>
 #include <iostream>
 #include "argparse.hpp"
 
@@ -16,16 +17,16 @@
 #define reset "\033[0m"
 
 // use
+using std::map;
+using std::pair;
 using std::vector;
 using std::string;
-using std::map;
 
 // parser contains
 int parsing::ArgParser::contains(vector<string> targetVec, string item) {
     auto res = std::find(targetVec.begin(), targetVec.end(), item);
     if (res != targetVec.end()) {
         return res - targetVec.begin();
-        
     } else {
         return -1; 
     }
@@ -39,25 +40,37 @@ void parsing::ArgParser::addArg(string arg, bool reqNextArg, bool multipleAllowe
 }
 
 // parser parse
-void parsing::ArgParser::parse(int argc, char *argv[]) {
+void parsing::ArgParser::parse(int argc, char *argv[], bool allowInvalidArguments) {
     if (argc == 1) {
-        std::cerr << red << "ArgParser Error "<< reset << ArgParserNoFileErr << std::endl;
+        std::cerr << red << "ArgParse Error "<< reset << ArgParserNoFileErr << std::endl;
         exit(1);
     } else {
-        for (int argIndex = 1; argIndex < argc; argIndex++) {
-            int in = contains(parsing::ArgParser::argKeys, argv[argIndex]);
-            if (in != -1) {
-                // if able to have multiple instances or not done yet
+        int argIndex = 1;
+        while (argIndex < argc) {
+            if (contains(parsing::ArgParser::argKeys, argv[argIndex]) != -1) {
                 if (contains(parsing::ArgParser::multi, argv[argIndex]) != -1 || contains(parsing::ArgParser::multiDone, argv[argIndex]) == -1) {
                     parsing::ArgParser::multiDone.push_back(argv[argIndex]);
-                    std::cout << "Argument " << argv[argIndex] << " OK"<< std::endl;
+                    std::cout << "Argument: " << argv[argIndex] << " is OK" << std::endl;
+                    if (argc-1 >= argIndex+1) {
+                        argIndex++;
+                    } else {
+                        std::cerr << red << "ArgParse Error " << reset << ArgParserNoArgErr << std::endl;
+                        exit(1);
+
+                    }
                 } else {
-                    std::cout << "Argument " << argv[argIndex] << " disallowed"<< std::endl;
+                    std::cerr << red << "ArgParse Error " << reset << ArgParserMultiargErr << red << " \'" << reset << argv[argIndex] << red << "\'" << reset << std::endl; 
+                    exit(1);
                 }
             } else {
-                std::cerr << red << "ArgParser Error " << reset << ArgParserInvalidArgErr << std::endl;
-                exit(1);
+                if (!allowInvalidArguments) {
+                    std::cerr << red << "ArgParse Error " << reset << ArgParserInvalidArgErr <<red << " \'" << reset << argv[argIndex] << red << "\'" << reset << std::endl;
+                    exit(1);
+                }
+                otherArgs.push_back(argv[argIndex]);
             }
+            std::cout << "arg: " << argv[argIndex] << std::endl;
+            argIndex++;
         }
     }
 }
