@@ -1,10 +1,17 @@
-#include <stdlib.h>
+///////////////////////////////////////////////////
+// vector - A C library adding c++ sting vectors //
+// Written/Copyright by NewDawn0 (Tom) 7.12.2022 //
+// Code is licensed under the MIT license        //
+///////////////////////////////////////////////////
+
+// Ispired by "https://markkevinbaltazar.medium.com/lets-make-a-dynamic-array-vector-in-c-16dbe6d72a79
+
+// libs
 #include "vector.h"
+#include <stdlib.h>
 
-// source "https://markkevinbaltazar.medium.com/lets-make-a-dynamic-array-vector-in-c-16dbe6d72a79"
-
-// Push
-void VectorPush(Vector* self, void* data) {
+// Vector push
+void VectorPush(vector* self, void* data) {
     // resize if full
     if (self->count == self->limit) {
         self->limit = self->limit+1;
@@ -14,8 +21,9 @@ void VectorPush(Vector* self, void* data) {
     self->data[self->count] = data;
     self->count ++;
 }
-// remove
-void VectorRemove(Vector* self, int index) {
+
+// Vector remove
+void VectorRemove(vector* self, int index) {
     if (index > -1 && index < self->count) {
         // swap the last item to the index to be removed
         // then remove the last item
@@ -24,15 +32,17 @@ void VectorRemove(Vector* self, int index) {
         self->count --;
     }
 }
-// delete
-void VectorFree(Vector* self) {
+
+// Vector delete
+void VectorFree(vector* self) {
     if (self->data) {
         free(self->data);
         self->data = NULL;
     }
 }
-// init
-void VectorInit(Vector* vector) {
+
+// Initialize Vector
+void VectorInit(vector* vector) {
     vector->limit = VECTOR_INIT_LIM;
     vector->count = 0;
     vector->push = VectorPush;
